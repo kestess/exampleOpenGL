@@ -110,6 +110,7 @@ int main(int argc, const char * argv[]) {
     
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    // I can't change this to compat and remove the VAO binding (using 4.1)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // needed for mac
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
@@ -124,6 +125,8 @@ int main(int argc, const char * argv[]) {
     
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+    
+    glfwSwapInterval(1); // was smooth before this - might be the only thing that is automatic on a mac
     
     glewExperimental = GL_TRUE; // needed for mac
     if (glewInit() != GLEW_OK) {
@@ -148,6 +151,7 @@ int main(int argc, const char * argv[]) {
         2,3,0
     };
     
+    // apparently just an opengl construct
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -155,6 +159,7 @@ int main(int argc, const char * argv[]) {
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    // index 0 of VAO is being bound to currently bound gl array buffer
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
     glEnableVertexAttribArray(0);
     glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
@@ -171,7 +176,21 @@ int main(int argc, const char * argv[]) {
     std::cout << vertexShader << std::endl;
     
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
-    glUseProgram(shader);
+    glUseProgram(shader); // this must be bound to use uniform
+    
+    // ask for where u_Color is
+    GlCall(int location = glGetUniformLocation(shader, "u_Color"));
+    ASSERT(location != -1);
+    GlCall(glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f));
+    
+    // unbind buffers after initial setup
+    glBindVertexArray(0);
+    glUseProgram(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    
+    float r = 0.0f;
+    float increment = 0.01f;
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -181,9 +200,32 @@ int main(int argc, const char * argv[]) {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
         
+        // GlCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+        
         // glDrawArrays(GL_TRIANGLES, 0, 3);
+        
+        glUseProgram(shader);
+        GlCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+        // GlCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+        glBindVertexArray(VAO);
+        GlCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBA));
+        
+        // these may have changed if another vertex array was drawn
+        // might have different VAO for each object drawn
+        // GlCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
+        // GlCall(glEnableVertexAttribArray(0));
+        
         GlCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
         
+        r += increment;
+        if (r > 1.0f) {
+            increment = -0.01;
+            r = 1.0f;
+        } else if (r < 0.0f) {
+            increment = 0.01;
+            r = 0.0f;
+        }
+
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
         
