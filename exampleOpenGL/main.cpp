@@ -3,6 +3,8 @@
 //
 
 #include <iostream>
+#include <fstream>
+#include <string>
 
 // GLEW
 #define GLEW_STATIC
@@ -10,6 +12,18 @@
 
 // GLFW
 #include <GLFW/glfw3.h>
+
+static std::string getShader(const std::string& filepath) {
+    
+    std::ifstream stream(filepath);
+    std::string line;
+    std::string shaderText;
+    while (getline(stream, line)) {
+        std::cout << "my line is: " << line << std::endl;
+        shaderText += line + '\n';
+    }
+    return shaderText;
+}
 
 static unsigned int CompileShader(unsigned int type, const std::string& source) {
     
@@ -120,21 +134,11 @@ int main(int argc, const char * argv[]) {
     glEnableVertexAttribArray(0);
     glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
     
-    std::string vertexShader =
-    "#version 330 core\n"
-    "layout(location = 0) in vec4 position;\n"
-    "void main()\n"
-    "{\n"
-    "gl_Position = vec4(position);\n"
-    "}\n";
+    std::string vertexShader = getShader("res/vertex.shader");
+    std::string fragmentShader = getShader("res/fragment.shader");
     
-    std::string fragmentShader =
-    "#version 330 core\n"
-    "layout(location = 0) out vec4 color;\n"
-    "void main()\n"
-    "{\n"
-    "color = vec4(1.0, 0, 0, 1.0);\n"
-    "}\n";
+    std::cout << "shader dude" << std::endl;
+    std::cout << vertexShader << std::endl;
     
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
     glUseProgram(shader);
