@@ -122,10 +122,10 @@ int main(int argc, const char * argv[]) {
     
     std::string vertexShader =
     "#version 330 core\n"
-    "layout(location = 0) in vec2 position;\n"
+    "layout(location = 0) in vec4 position;\n"
     "void main()\n"
     "{\n"
-    "gl_Position = vec4(position.x, position.y, 0, 1.0f);\n"
+    "gl_Position = vec4(position);\n"
     "}\n";
     
     std::string fragmentShader =
@@ -156,6 +156,8 @@ int main(int argc, const char * argv[]) {
         glfwPollEvents();
     }
     
+    glDeleteShader(shader);
+
     glfwTerminate();
     return 0;
     
