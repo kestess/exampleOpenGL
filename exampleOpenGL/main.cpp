@@ -5,6 +5,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstdlib>
+
+#define ASSERT(x) if (!(x)) abort();
+#define GlCall(x) GlClearError();\
+x;\
+ASSERT(GlLogCall(#x, __FILE__, __LINE__))
 
 // GLEW
 #define GLEW_STATIC
@@ -13,6 +19,19 @@
 // GLFW
 #include <GLFW/glfw3.h>
 
+// glDebugMessageCallback in 4.3 - Mac seems to stop at 4.1 - mine is 4.1
+
+static void GlClearError() {
+    while(glGetError() != GL_NO_ERROR);
+}
+
+static bool GlLogCall(const char* function, const char* file, int line) {
+    while (GLenum error = glGetError()) {
+        std::cout << "[OpenGL Error] (" << error << "):" << function << " " << file << ":" << line << std::endl;
+        return false;
+    }
+    return true;
+}
 static std::string getShader(const std::string& filepath) {
     
     std::ifstream stream(filepath);
@@ -163,7 +182,7 @@ int main(int argc, const char * argv[]) {
         glClear(GL_COLOR_BUFFER_BIT);
         
         // glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        GlCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
         
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
