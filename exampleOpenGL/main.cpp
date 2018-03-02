@@ -103,25 +103,29 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
     return program;
 }
 
+const GLint WIDTH = 800, HEIGHT = 600;
 
 int main(int argc, const char * argv[]) {
 
     if (!glfwInit()) return -1;
     
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     // I can't change this to compat and remove the VAO binding (using 4.1)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // needed for mac
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     /* Create a windowed mode window and its OpenGL context */
-    GLFWwindow* window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
         return -1;
     }
+    
+    int screenWidth, screenHeight;
+    glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
     
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
@@ -137,18 +141,16 @@ int main(int argc, const char * argv[]) {
     std::cout << glfwGetVersionString() << std::endl;
     std::cout << glGetString(GL_VERSION) << std::endl;
     
-    glViewport(0, 0, 640, 480);
+    glViewport(0, 0, screenWidth, screenHeight);
     
     float positions[] = {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.5f, 0.5f,
-         -0.5f, 0.5f
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
     };
     
     unsigned int indices[] = {
-        0,1,2,
-        2,3,0
+        0,1,2
     };
     
     // apparently just an opengl construct
@@ -159,10 +161,16 @@ int main(int argc, const char * argv[]) {
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), positions, GL_STATIC_DRAW);
+    
     // index 0 of VAO is being bound to currently bound gl array buffer
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid *)0);
     glEnableVertexAttribArray(0);
-    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
+    
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid *) (sizeof(float) * 3));
+    glEnableVertexAttribArray(1);
+    
+    glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), positions, GL_STATIC_DRAW);
 
     unsigned int IBA;
     glGenBuffers(1, &IBA);
@@ -179,18 +187,18 @@ int main(int argc, const char * argv[]) {
     glUseProgram(shader); // this must be bound to use uniform
     
     // ask for where u_Color is
-    GlCall(int location = glGetUniformLocation(shader, "u_Color"));
-    ASSERT(location != -1);
-    GlCall(glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f));
+    // GlCall(int location = glGetUniformLocation(shader, "u_Color"));
+    // ASSERT(location != -1);
+    // GlCall(glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f));
     
     // unbind buffers after initial setup
-    glBindVertexArray(0);
-    glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//    glBindVertexArray(0);
+//    glUseProgram(0);
+//    glBindBuffer(GL_ARRAY_BUFFER, 0);
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     
-    float r = 0.0f;
-    float increment = 0.01f;
+    // float r = 0.0f;
+    // float increment = 0.01f;
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -205,7 +213,7 @@ int main(int argc, const char * argv[]) {
         // glDrawArrays(GL_TRIANGLES, 0, 3);
         
         glUseProgram(shader);
-        GlCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+        // GlCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
         // GlCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
         glBindVertexArray(VAO);
         GlCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBA));
@@ -215,16 +223,16 @@ int main(int argc, const char * argv[]) {
         // GlCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
         // GlCall(glEnableVertexAttribArray(0));
         
-        GlCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        GlCall(glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr));
         
-        r += increment;
-        if (r > 1.0f) {
-            increment = -0.01;
-            r = 1.0f;
-        } else if (r < 0.0f) {
-            increment = 0.01;
-            r = 0.0f;
-        }
+//        r += increment;
+//        if (r > 1.0f) {
+//            increment = -0.01;
+//            r = 1.0f;
+//        } else if (r < 0.0f) {
+//            increment = 0.01;
+//            r = 0.0f;
+//        }
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
