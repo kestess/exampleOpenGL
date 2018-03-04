@@ -25,6 +25,9 @@ ASSERT(GlLogCall(#x, __FILE__, __LINE__))
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 // glDebugMessageCallback in 4.3 - Mac seems to stop at 4.1 - mine is 4.1
 
 static void GlClearError() {
@@ -216,9 +219,12 @@ int main(int argc, const char * argv[]) {
     std::cout << "shaders" << std::endl;
     std::cout << vertexShader << std::endl;
     std::cout << fragmentShader << std::endl;
-
+    
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
     glUseProgram(shader); // this must be bound to use uniform
+    
+    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+    GlCall(glUniformMatrix4fv(glGetUniformLocation(shader, "u_MVP"), 1, GL_FALSE, &proj[0][0]));
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
