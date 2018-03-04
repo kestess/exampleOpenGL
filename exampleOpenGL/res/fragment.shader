@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec3 ourColor;
+// in vec3 ourColor; // wasn't needed for last commit anyway
 in vec2 TexCoord;
 
 out vec4 color;
