@@ -162,7 +162,7 @@ int main(int argc, const char * argv[]) {
     
     // Set up vertex data (and buffer(s)) and attribute pointers
     // use with Orthographic Projection
-    /*
+
      GLfloat vertices[] = {
      -0.5f * 500, -0.5f * 500, -0.5f * 500,  0.0f, 0.0f,
      0.5f * 500, -0.5f * 500, -0.5f * 500,  1.0f, 0.0f,
@@ -206,8 +206,8 @@ int main(int argc, const char * argv[]) {
      -0.5f * 500,  0.5f * 500,  0.5f * 500,  0.0f, 0.0f,
      -0.5f * 500,  0.5f * 500, -0.5f * 500,  0.0f, 1.0f
      };
-     */
-    
+
+/*
     // use with Perspective Projection
     GLfloat vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -252,7 +252,7 @@ int main(int argc, const char * argv[]) {
         -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
-    
+*/
     // apparently just an opengl construct
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
@@ -308,8 +308,8 @@ int main(int argc, const char * argv[]) {
     // GlCall(glUniformMatrix4fv(glGetUniformLocation(shader, "u_MVP"), 1, GL_FALSE, &proj[0][0]));
     
     glm::mat4 projection;
-    projection = glm::perspective(45.0f, (GLfloat)screenWidth/(GLfloat)screenHeight, 0.1f, 1000.0f);
-    
+    // projection = glm::perspective(45.0f, (GLfloat)screenWidth/(GLfloat)screenHeight, 0.1f, 1000.0f);
+    projection = glm::ortho(0.0f, (GLfloat)screenWidth, 0.0f, (GLfloat)screenHeight, 0.1f, 1000.0f);
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -334,8 +334,11 @@ int main(int argc, const char * argv[]) {
         glm::mat4 model;
         glm::mat4 view;
         // supposedly can replicate this line
-        model = glm::rotate(model, (GLfloat)glfwGetTime() * 1.0f, glm::vec3(0.5f, 1.0f, 0.0f));
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+//        model = glm::rotate(model, (GLfloat)glfwGetTime() * 1.0f, glm::vec3(0.5f, 1.0f, 0.0f));
+//        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        
+        model = glm::rotate(model, 0.5f, glm::vec3(1.0f, 0.0f, 0.0f));
+        view = glm::translate(view, glm::vec3(screenWidth/2, screenHeight/2, -900.0f));
         
         GLint modelLoc = glGetUniformLocation(shader, "model");
         GLint viewLoc = glGetUniformLocation(shader, "view");
