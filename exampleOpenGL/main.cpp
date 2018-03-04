@@ -27,6 +27,7 @@ ASSERT(GlLogCall(#x, __FILE__, __LINE__))
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 // glDebugMessageCallback in 4.3 - Mac seems to stop at 4.1 - mine is 4.1
 
@@ -223,8 +224,8 @@ int main(int argc, const char * argv[]) {
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
     glUseProgram(shader); // this must be bound to use uniform
     
-    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
-    GlCall(glUniformMatrix4fv(glGetUniformLocation(shader, "u_MVP"), 1, GL_FALSE, &proj[0][0]));
+    // glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+    // GlCall(glUniformMatrix4fv(glGetUniformLocation(shader, "u_MVP"), 1, GL_FALSE, &proj[0][0]));
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -234,6 +235,14 @@ int main(int argc, const char * argv[]) {
         glClear(GL_COLOR_BUFFER_BIT);
   
         glUseProgram(shader);
+        
+        glm::mat4 transform;
+        
+        transform = glm::translate(transform, glm::vec3(0.5f, -0.0f, 0.0f));
+        transform = glm::rotate(transform, (GLfloat)glfwGetTime() * -1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+        
+        // probably just need to retrieve locations once.
+        GlCall(glUniformMatrix4fv(glGetUniformLocation(shader, "u_MVP"), 1, GL_FALSE, glm::value_ptr(transform)));
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
