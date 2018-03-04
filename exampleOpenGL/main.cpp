@@ -334,7 +334,7 @@ int main(int argc, const char * argv[]) {
         glm::mat4 model;
         glm::mat4 view;
         // supposedly can replicate this line
-        model = glm::rotate(model, (GLfloat)glfwGetTime() * 1.0f, glm::vec3(0.05f, 1.0f, 0.0f));
+        model = glm::rotate(model, (GLfloat)glfwGetTime() * 1.0f, glm::vec3(0.5f, 1.0f, 0.0f));
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
         
         GLint modelLoc = glGetUniformLocation(shader, "model");
